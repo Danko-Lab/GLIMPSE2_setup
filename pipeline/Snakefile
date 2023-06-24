@@ -228,5 +228,5 @@ rule split_reference:
                 --output {params.prefix};
         done < {input.chunks}
         echo "Done" > {output}
-        echo "REMINDER: Check if expected output {params}.bin files exist."
+        echo "REMINDER: Check if expected output {params.prefix}_start_stop.bin files exist."
         """
