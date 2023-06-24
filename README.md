@@ -1,2 +1,3 @@
 # GLIMPSE2_setup
- Scripts to create a phased reference panel from 1kGP for imputation with GLIMPSE
+
+ This repo contains a snakemake pipeline to create a phased reference panel from 1kGP for imputation with GLIMPSE2.

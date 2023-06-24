@@ -1,0 +1,232 @@
+"""
+This pipeline follows the GLIMPSE2 1kGP tutorial to create a 1kGP reference panel for
+low pass sequencing imputation with GLIMPSE2.
+https://odelaneau.github.io/GLIMPSE/docs/tutorials/getting_started/
+
+The QC'ed reference is located at REFDIR, with the split binary files in
+REFDIR/glimpse_split.
+"""
+
+import os
+import json
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Define master rule (forces Snakemake to generate all missing files)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+with open("../spec/file_spec.json", "r") as f:
+    dirs = json.load(f)
+    REFDIR = dirs["1KGP_DIR"]
+    MAPDIR = dirs["MAPDIR"]
+    GLIMPSEPATH = dirs["GLIMPSEPATH"]
+
+reference_panel = expand(
+    os.path.join(
+        REFDIR,
+        "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.bcf{ext}",
+    ),
+    chrom=list(range(1, 23)) + ["X"],
+    ext=["", ".csi"],
+)
+sites = expand(
+    os.path.join(
+        REFDIR,
+        "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.sites.vcf.gz",
+    ),
+    chrom=list(range(1, 23)) + ["X"],
+    ext=["", ".csi"],
+)
+chunks = expand(
+    os.path.join(REFDIR, "1kGP.chunks.chr{chrom}.txt"),
+    chrom=list(range(1, 23)) + ["X"],
+)
+split_ref = expand(
+    os.path.join(REFDIR, "glimpse_split", "1kGP.chr{chrom}.txt"),
+    chrom=list(range(1, 23)) + ["X"],
+)
+
+
+rule all:
+    input:
+        reference_panel,
+        sites,
+        chunks,
+        split_ref,
+    shell:
+        """
+        echo done
+        """
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Download reference
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+# rule download_1kgp_phased_reference:
+#    input:
+#        url_list="../../spec/1kGP_urls.txt",
+#    params:
+#        REFDIR=REFDIR,
+#        jobs=16,
+#    resources:
+#        load=1,
+#    output:
+#        autosomes=expand(
+#            os.path.join(
+#                REFDIR,
+#                "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.vcf.gz{ext}",
+#            ),
+#            chrom=range(1, 23),
+#            ext=["", ".tbi"],
+#        ),
+#        X=expand(
+#            os.path.join(
+#                REFDIR,
+#                "1kGP_high_coverage_Illumina.chrX.filtered.SNV_INDEL_SV_phased_panel.vcf.v2.gz{ext}",
+#            ),
+#            ext=["", ".tbi"],
+#        ),
+#    shell:
+#        "parallel -j {params.jobs} wget -P {params.REFDIR} < {input.url_list}"
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Split multiallelic records
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+rule qc_reference_panel_autosomes:
+    input:
+        vcf=os.path.join(
+            REFDIR,
+            "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.vcf.gz",
+        ),
+    output:
+        bcf=os.path.join(
+            REFDIR,
+            "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.bcf",
+        ),
+        index=os.path.join(
+            REFDIR,
+            "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.bcf.csi",
+        ),
+    shell:
+        """
+        bcftools norm -m -any -Ob -o {output.bcf} {input}
+        bcftools index -f {output.bcf}
+        """
+
+
+rule qc_reference_panel_X:
+    input:
+        vcf=os.path.join(
+            REFDIR,
+            "1kGP_high_coverage_Illumina.chrX.filtered.SNV_INDEL_SV_phased_panel.v2.vcf.gz",
+        ),
+    output:
+        bcf=os.path.join(
+            REFDIR,
+            "1kGP_high_coverage_Illumina.chrX.filtered.SNV_INDEL_SV_phased_panel.bcf",
+        ),
+        index=os.path.join(
+            REFDIR,
+            "1kGP_high_coverage_Illumina.chrX.filtered.SNV_INDEL_SV_phased_panel.bcf.csi",
+        ),
+    shell:
+        """
+        bcftools norm -m -any -Ob -o {output.bcf} {input}
+        bcftools index -f {output.bcf}
+        """
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Extract sites from the reference panel
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+rule extract_sites:
+    input:
+        bcf=os.path.join(
+            REFDIR,
+            "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.bcf",
+        ),
+    output:
+        sites=os.path.join(
+            REFDIR,
+            "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.sites.vcf.gz",
+        ),
+        index=os.path.join(
+            REFDIR,
+            "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.sites.vcf.gz.csi",
+        ),
+    shell:
+        """
+        bcftools view -G -Oz -o {output.sites} {input}
+        bcftools index -f {output.sites}
+        """
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Chunk the reference panel
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+rule chunk_chromosomes:
+    input:
+        sites=os.path.join(
+            REFDIR,
+            "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.sites.vcf.gz",
+        ),
+        gmap=os.path.join(MAPDIR, "chr{chrom}.b38.gmap.gz"),
+    params:
+        chrom="chr{chrom}",
+        GLIMPSEPATH=GLIMPSEPATH,
+    output:
+        chunks=os.path.join(REFDIR, "1kGP.chunks.chr{chrom}.txt"),
+    shell:
+        """
+        export PATH={params.GLIMPSEPATH}:$PATH
+        GLIMPSE2_chunk \
+            --input {input.sites} \
+            --region {params.chrom} \
+            --output {output.chunks} \
+            --map {input.gmap} \
+            --sequential
+        """
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Create binary reference panel
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+rule split_reference:
+    input:
+        REF=os.path.join(
+            REFDIR,
+            "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.bcf",
+        ),
+        MAP=os.path.join(MAPDIR, "chr{chrom}.b38.gmap.gz"),
+        chunks=os.path.join(REFDIR, "1kGP.chunks.chr{chrom}.txt"),
+    params:
+        GLIMPSEPATH=GLIMPSEPATH,
+        prefix=os.path.join(REFDIR, "glimpse_split", "1kGP.chr{chrom}"),
+    output:
+        os.path.join(REFDIR, "glimpse_split", "1kGP.chr{chrom}.txt"),
+    shell:
+        """
+        export PATH={params.GLIMPSEPATH}:$PATH
+        while IFS="" read -r LINE || [ -n "$LINE" ]; do
+            printf -v ID "%02d" $(echo $LINE | cut -d" " -f1)
+            IRG=$(echo $LINE | cut -d" " -f3)
+            ORG=$(echo $LINE | cut -d" " -f4)
+
+            GLIMPSE2_split_reference \
+                --reference {input.REF} --map {input.MAP} \
+                --input-region $IRG --output-region $ORG \
+                --output {params.prefix};
+        done < {input.chunks}
+        echo "Done" > {output}
+        echo "REMINDER: Check if expected output {params}.bin files exist."
+        """
