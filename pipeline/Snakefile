@@ -1,6 +1,6 @@
 """
-This pipeline follows the GLIMPSE2 1kGP tutorial to create a 1kGP reference panel for
-low pass sequencing imputation with GLIMPSE2.
+This pipeline follows the GLIMPSE 1kGP tutorial to create a 1kGP reference panel for
+low pass sequencing imputation with GLIMPSE.
 https://odelaneau.github.io/GLIMPSE/docs/tutorials/getting_started/
 
 The QC'ed reference is located at REFDIR, with the split binary files in
