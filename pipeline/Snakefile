@@ -63,7 +63,7 @@ rule all:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
- rule download_1kgp_phased_reference:
+rule download_1kgp_phased_reference:
     input:
         url_list="../../spec/1kGP_urls.txt",
     params:
@@ -79,7 +79,7 @@ rule all:
             ),
             chrom=range(1, 23),
             ext=["", ".tbi"],
-        )
+        ),
     shell:
         "parallel -j {params.jobs} wget -P {params.REFDIR} < {input.url_list}"
 
@@ -109,6 +109,7 @@ rule qc_reference_panel_autosomes:
         bcftools norm -m -any -Ob -o {output.bcf} {input}
         bcftools index -f {output.bcf}
         """
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Extract sites from the reference panel
@@ -181,7 +182,7 @@ rule split_reference:
         chunks=os.path.join(REFDIR, "1kGP.chunks.chr{chrom}.txt"),
     params:
         GLIMPSEPATH=GLIMPSEPATH,
-        prefix=os.path.join(REFDIR, "glimpse_split", "1kGP.chr{chrom}"),
+        prefix=os.path.join(REFDIR, "glimpse_split", "1kGP"),
     output:
         os.path.join(REFDIR, "glimpse_split", "1kGP.chr{chrom}.txt"),
     shell:
