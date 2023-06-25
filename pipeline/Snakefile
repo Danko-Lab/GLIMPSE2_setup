@@ -25,7 +25,7 @@ reference_panel = expand(
         REFDIR,
         "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.bcf{ext}",
     ),
-    chrom=list(range(1, 23)) + ["X"],
+    chrom=range(1, 23),
     ext=["", ".csi"],
 )
 sites = expand(
@@ -33,16 +33,16 @@ sites = expand(
         REFDIR,
         "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.sites.vcf.gz",
     ),
-    chrom=list(range(1, 23)) + ["X"],
+    chrom=range(1, 23),
     ext=["", ".csi"],
 )
 chunks = expand(
     os.path.join(REFDIR, "1kGP.chunks.chr{chrom}.txt"),
-    chrom=list(range(1, 23)) + ["X"],
+    chrom=range(1, 23),
 )
 split_ref = expand(
     os.path.join(REFDIR, "glimpse_split", "1kGP.chr{chrom}.txt"),
-    chrom=list(range(1, 23)) + ["X"],
+    chrom=range(1, 23),
 )
 
 
@@ -63,32 +63,25 @@ rule all:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-# rule download_1kgp_phased_reference:
-#    input:
-#        url_list="../../spec/1kGP_urls.txt",
-#    params:
-#        REFDIR=REFDIR,
-#        jobs=16,
-#    resources:
-#        load=1,
-#    output:
-#        autosomes=expand(
-#            os.path.join(
-#                REFDIR,
-#                "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.vcf.gz{ext}",
-#            ),
-#            chrom=range(1, 23),
-#            ext=["", ".tbi"],
-#        ),
-#        X=expand(
-#            os.path.join(
-#                REFDIR,
-#                "1kGP_high_coverage_Illumina.chrX.filtered.SNV_INDEL_SV_phased_panel.vcf.v2.gz{ext}",
-#            ),
-#            ext=["", ".tbi"],
-#        ),
-#    shell:
-#        "parallel -j {params.jobs} wget -P {params.REFDIR} < {input.url_list}"
+ rule download_1kgp_phased_reference:
+    input:
+        url_list="../../spec/1kGP_urls.txt",
+    params:
+        REFDIR=REFDIR,
+        jobs=16,
+    resources:
+        load=1,
+    output:
+        autosomes=expand(
+            os.path.join(
+                REFDIR,
+                "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.vcf.gz{ext}",
+            ),
+            chrom=range(1, 23),
+            ext=["", ".tbi"],
+        )
+    shell:
+        "parallel -j {params.jobs} wget -P {params.REFDIR} < {input.url_list}"
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,29 +109,6 @@ rule qc_reference_panel_autosomes:
         bcftools norm -m -any -Ob -o {output.bcf} {input}
         bcftools index -f {output.bcf}
         """
-
-
-rule qc_reference_panel_X:
-    input:
-        vcf=os.path.join(
-            REFDIR,
-            "1kGP_high_coverage_Illumina.chrX.filtered.SNV_INDEL_SV_phased_panel.v2.vcf.gz",
-        ),
-    output:
-        bcf=os.path.join(
-            REFDIR,
-            "1kGP_high_coverage_Illumina.chrX.filtered.SNV_INDEL_SV_phased_panel.bcf",
-        ),
-        index=os.path.join(
-            REFDIR,
-            "1kGP_high_coverage_Illumina.chrX.filtered.SNV_INDEL_SV_phased_panel.bcf.csi",
-        ),
-    shell:
-        """
-        bcftools norm -m -any -Ob -o {output.bcf} {input}
-        bcftools index -f {output.bcf}
-        """
-
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Extract sites from the reference panel
