@@ -31,7 +31,7 @@ reference_panel = expand(
 sites = expand(
     os.path.join(
         REFDIR,
-        "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.sites.vcf.gz",
+        "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.sites.vcf.gz{ext}",
     ),
     chrom=range(1, 23),
     ext=["", ".csi"],
