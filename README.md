@@ -1,6 +1,6 @@
 # GLIMPSE2_setup
 
- This repo contains a snakemake pipeline to create a phased reference panel from 1kGP for imputation with GLIMPSE2.
+ This repo contains a snakemake pipeline to create a phased reference panel from 1kGP for imputation with GLIMPSE2. This pipeline follows their [tutorial](https://odelaneau.github.io/GLIMPSE/docs/tutorials/getting_started/#3-split-the-genome-into-chunks) and use the most recent high coverage integrated phased panel from [1kGP](http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20220422_3202_phased_SNV_INDEL_SV/).
 
 ## Requirements
 
