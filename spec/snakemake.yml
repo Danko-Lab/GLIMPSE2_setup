@@ -4,18 +4,8 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - biopython
-  - cutadapt
   - cython
-  - fastp
-  - joblib
-  - multiqc
   - numpy
   - pandas
   - pip
-  - pybedtools
-  - pysam
-  - scipy
-  - scikit-learn
   - snakemake
-  - ucsc-bedgraphtobigwig
