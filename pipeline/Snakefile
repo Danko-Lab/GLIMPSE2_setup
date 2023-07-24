@@ -68,7 +68,8 @@ rule download_1kgp_phased_reference:
         url_list="../../spec/1kGP_urls.txt",
     params:
         REFDIR=REFDIR,
-        jobs=16,
+    threads:
+        workflow.cores,
     resources:
         load=1,
     output:
