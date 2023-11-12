@@ -82,7 +82,7 @@ rule download_1kgp_phased_reference:
             ext=["", ".tbi"],
         ),
     shell:
-        "parallel -j {params.jobs} wget -P {params.REFDIR} < {input.url_list}"
+        "parallel -j {threads} wget -P {params.REFDIR} < {input.url_list}"
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
