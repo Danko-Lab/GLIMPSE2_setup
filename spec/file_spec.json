@@ -1,6 +1,6 @@
 {
-    "1KGP_DIR": "/fs/cbsubscb17/storage/data/1kGP_phased_panels/20220422_3202_phased_SNV_INDEL_SV/",
-    "MAPDIR": "/fs/cbsubscb17/storage/data/GLIMPSE/maps/genetic_maps.b38",
+    "1KGP_DIR": "./outputs/1KGP",
+    "MAPDIR": "./outputs/genetic_maps.b38",
     "GLIMPSEPATH": "/programs/glimpse_v2.0.0",
     "PARALLELPATH": "/programs/parallel-20210222/bin/parallel",
     "BCFTOOLSPATH": "/programs/bcftools-1.12/bcftools"

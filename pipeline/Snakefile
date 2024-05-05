@@ -67,9 +67,8 @@ rule download_1kgp_phased_reference:
     input:
         url_list="../../spec/1kGP_urls.txt",
     params:
-        REFDIR=REFDIR,
-    threads:
-        workflow.cores,
+        REFDIR,
+    threads: workflow.cores
     resources:
         load=1,
     output:
@@ -82,7 +81,23 @@ rule download_1kgp_phased_reference:
             ext=["", ".tbi"],
         ),
     shell:
-        "parallel -j {threads} wget -P {params.REFDIR} < {input.url_list}"
+        "parallel -j {threads} wget -P {REFDIR} < {input.url_list}"
+
+
+rule download_maps:
+    input:
+        url_list=os.path.join(
+            "https://github.com/odelaneau/GLIMPSE/blob/master/maps/genetic_maps.b38/",
+            "chr{chrom}.b38.gmap.gz",
+        ),
+    params:
+        MAPDIR,
+    resources:
+        load=1,
+    output:
+        os.path.join(MAPDIR, "chr{chrom}.b38.gmap.gz"),
+    shell:
+        "wget {input} -P {MAPDIR}"
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
