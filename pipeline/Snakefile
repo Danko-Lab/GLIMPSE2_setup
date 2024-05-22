@@ -65,7 +65,7 @@ rule all:
 
 rule download_1kgp_phased_reference:
     input:
-        url_list="../../spec/1kGP_urls.txt",
+        url_list="../spec/1kGP_urls.txt",
     params:
         REFDIR,
     threads: workflow.cores
@@ -85,20 +85,15 @@ rule download_1kgp_phased_reference:
 
 
 rule download_maps:
-    input:
-        url_list=os.path.join(
-            "https://github.com/odelaneau/GLIMPSE/blob/master/maps/genetic_maps.b38/",
-            "chr{chrom}.b38.gmap.gz",
-        ),
     params:
-        MAPDIR,
+        url="https://github.com/odelaneau/GLIMPSE/raw/master/maps/genetic_maps.b37/chr{chrom}.b37.gmap.gz",
+        MAPDIR=MAPDIR,
+    output:
+        os.path.join(MAPDIR, "chr{chrom}.b37.gmap.gz"),
     resources:
         load=1,
-    output:
-        os.path.join(MAPDIR, "chr{chrom}.b38.gmap.gz"),
     shell:
-        "wget {input} -P {MAPDIR}"
-
+        "wget {params.url} -O {output}"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Split multiallelic records
@@ -165,7 +160,7 @@ rule chunk_chromosomes:
             REFDIR,
             "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.sites.vcf.gz",
         ),
-        gmap=os.path.join(MAPDIR, "chr{chrom}.b38.gmap.gz"),
+        gmap=os.path.join(MAPDIR, "chr{chrom}.b37.gmap.gz"),
     params:
         chrom="chr{chrom}",
         GLIMPSEPATH=GLIMPSEPATH,
@@ -194,7 +189,7 @@ rule split_reference:
             REFDIR,
             "1kGP_high_coverage_Illumina.chr{chrom}.filtered.SNV_INDEL_SV_phased_panel.bcf",
         ),
-        MAP=os.path.join(MAPDIR, "chr{chrom}.b38.gmap.gz"),
+        MAP=os.path.join(MAPDIR, "chr{chrom}.b37.gmap.gz"),
         chunks=os.path.join(REFDIR, "1kGP.chunks.chr{chrom}.txt"),
     params:
         GLIMPSEPATH=GLIMPSEPATH,
