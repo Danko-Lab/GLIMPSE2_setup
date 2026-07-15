@@ -65,7 +65,7 @@ rule all:
 
 rule download_1kgp_phased_reference:
     input:
-        url_list="../../spec/1kGP_urls.txt",
+        url_list="../spec/1kGP_urls.txt",
     params:
         REFDIR,
     threads: workflow.cores
@@ -85,20 +85,15 @@ rule download_1kgp_phased_reference:
 
 
 rule download_maps:
-    input:
-        url_list=os.path.join(
-            "https://github.com/odelaneau/GLIMPSE/blob/master/maps/genetic_maps.b38/",
-            "chr{chrom}.b38.gmap.gz",
-        ),
     params:
-        MAPDIR,
-    resources:
-        load=1,
+        url="https://github.com/odelaneau/GLIMPSE/raw/master/maps/genetic_maps.b38/chr{chrom}.b38.gmap.gz",
+        MAPDIR=MAPDIR,
     output:
         os.path.join(MAPDIR, "chr{chrom}.b38.gmap.gz"),
+    resources:
+        load=1,
     shell:
-        "wget {input} -P {MAPDIR}"
-
+        "wget {params.url} -O {output}"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Split multiallelic records
