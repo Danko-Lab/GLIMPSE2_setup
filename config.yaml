@@ -1,0 +1,16 @@
+# Configuration for the GLIMPSE2 reference panel pipeline (see Snakefile).
+# Override any of these on the command line instead of editing this file, e.g.:
+#   snakemake --config 1KGP_DIR=/scratch/1KGP GLIMPSE2_CHUNK=/opt/glimpse/GLIMPSE2_chunk
+
+# Where the downloaded/derived 1kGP reference panel files are written.
+1KGP_DIR: outputs/1KGP
+# Where downloaded GLIMPSE genetic maps are written.
+MAPDIR: outputs/genetic_maps.b38
+
+# GLIMPSE2, bcftools, and GNU parallel are all installed by environment.yml
+# (GLIMPSE2 via the bioconda "glimpse-bio" package), so these only need to
+# change if you want to use a different install than the one on PATH.
+GLIMPSE2_CHUNK: GLIMPSE2_chunk
+GLIMPSE2_SPLIT_REFERENCE: GLIMPSE2_split_reference
+BCFTOOLS: bcftools
+PARALLEL: parallel
