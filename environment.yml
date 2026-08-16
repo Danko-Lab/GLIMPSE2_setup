@@ -9,3 +9,6 @@ dependencies:
   - pandas
   - pip
   - snakemake
+  - bcftools
+  - parallel
+  - glimpse-bio

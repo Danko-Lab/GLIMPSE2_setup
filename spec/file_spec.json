@@ -1,7 +1,0 @@
-{
-    "1KGP_DIR": "./outputs/1KGP",
-    "MAPDIR": "./outputs/genetic_maps.b38",
-    "GLIMPSEPATH": "/programs/glimpse_v2.0.0",
-    "PARALLELPATH": "/programs/parallel-20210222/bin/parallel",
-    "BCFTOOLSPATH": "/programs/bcftools-1.12/bcftools"
-}
